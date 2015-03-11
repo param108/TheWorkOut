@@ -8,4 +8,5 @@
     <string name="title_activity_add_workout">AddWorkout</string>
     <string name="title_activity_show_work_out">ShowWorkOut</string>
     <string name="title_activity_show_focus_area">ShowFocusArea</string>
+    <string name="title_activity_modify_exercise">ModifyExercise</string>
 </resources>

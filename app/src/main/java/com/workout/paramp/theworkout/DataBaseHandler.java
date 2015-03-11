@@ -30,6 +30,23 @@ public class DataBaseHandler {
         return instance;
     }
 
+    public void createExerciseTable() {
+        SQLiteStatement stmt;
+        try {
+            stmt = myDB.compileStatement("drop table exercise_data");
+            stmt.execute();
+        } catch (Exception e) {
+            /* ignore a drop error */
+        }
+        stmt = myDB.compileStatement("Create table exercise_data ( exercise_id int PRIMARY KEY NOT NULL," +
+                "focus_id int NOT NULL,"  + // focus for this exercise
+                "name char(30) NOT NULL UNIQUE," + // name of exercise
+                "details char(150) NOT NULL, FOREIGN KEY(focus_id) REFERENCES focus_data(focus_id))"   // details of exercise, usually a url
+        );
+        stmt.execute();
+
+    }
+
     public void CreateDb() {
         try {
             SQLiteStatement stmt = myDB.compileStatement("Create table workouts ( name char(20) PRIMARY KEY NOT NULL," +
@@ -55,17 +72,14 @@ public class DataBaseHandler {
                     "remarks char(250) NOT NULL)"       // remarks about the workout
             );
             stmt.execute();
-            stmt = myDB.compileStatement("Create table exercise_data ( exercise_id int NOT NULL," +
-                    "focus_id int NOT NULL,"  + // focus for this exercise
-                    "name char(30) NOT NULL," + // name of exercise
-                    "details char(150) NOT NULL)"   // details of exercise, usually a url
-            );
-            stmt.execute();
             stmt = myDB.compileStatement("Create table focus_data ( focus_id int PRIMARY KEY NOT NULL," +
                     "name char(30) NOT NULL UNIQUE," + // name of focus area
                     "details char(150) NOT NULL)"   // details of the focus area/muscle group, usually a url
             );
             stmt.execute();
+
+            createExerciseTable();
+
         } catch (Exception s) {
             // Work out db already exists with necessary tables
             // return the db
@@ -113,4 +127,9 @@ public class DataBaseHandler {
     public void removeFocusArea(String s) {
         myDB.delete("focus_data","name" + " = ?" , new String[]{s});
     }
+
+    public void removeExercise(String s) {
+        myDB.delete("exercise_data","name" + " = ?" , new String[]{s});
+    }
+
 }

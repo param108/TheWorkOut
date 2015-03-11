@@ -1,16 +1,22 @@
 package com.workout.paramp.theworkout;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +24,47 @@ import java.util.Map;
 public class AddExercise extends ActionBarActivity {
 
     Map<String,Integer> focus_map;
+    Map<String,Integer> exercise_map;
+    private void populateExercises() {
+        exercise_map.clear();
+        SQLiteDatabase db = DataBaseHandler.getInstance(this).myDB;
+        String[] cols = {"name","exercise_id"};
+        Cursor c = db.query(true,"exercise_data",cols,null,null,null,null,null,null);
+        if (c.getCount() == 0) {
+            c.close();
+            return;
+        }
 
+        LinearLayout l = (LinearLayout)findViewById(R.id.ex_lin_layout);
+        c.moveToFirst();
+        while(!c.isAfterLast()) {
+            exercise_map.put(c.getString(0),c.getInt(1));
+            LayoutInflater inflater = (LayoutInflater) getApplicationContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inflater.inflate(R.layout.exercise_list,l, false);
+            TextView ex_tv = (TextView) rowView.findViewById(R.id.textView);
+            ex_tv.setText(c.getString(0));
+            Button b = (Button) rowView.findViewById(R.id.button);
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String a = ((TextView)(((RelativeLayout)v.getParent()).getChildAt(0))).getText().toString();
+                    DataBaseHandler.getInstance(getApplicationContext()).removeExercise(a);
+                    populateExercises();
+                }
+            });
+            ex_tv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    /*
+                     * add code here to go to modify screen
+                     */
+                }
+            });
+            c.moveToNext();
+        }
+        c.close();
+    }
     private void populateSpinner() {
 
         /*
@@ -42,7 +88,7 @@ public class AddExercise extends ActionBarActivity {
             focus_names.add(c.getString(1));
             c.moveToNext();
         }
-
+        c.close();
 
         Spinner spinner = (Spinner) findViewById(R.id.focus_spinner);
 
@@ -59,9 +105,19 @@ public class AddExercise extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         focus_map = new HashMap<String,Integer>();
+        exercise_map = new HashMap<String,Integer>();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_exercise);
         populateSpinner();
+        populateExercises();
+        Button b = (Button)findViewById(R.id.add_exercise);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
 

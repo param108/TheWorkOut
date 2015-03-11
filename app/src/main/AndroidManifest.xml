@@ -20,6 +20,7 @@
             android:label="@string/title_activity_add_exercise" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -34,6 +35,10 @@
         <activity
             android:name=".ShowFocusArea"
             android:label="@string/title_activity_show_focus_area" >
+        </activity>
+        <activity
+            android:name=".ModifyExercise"
+            android:label="@string/title_activity_modify_exercise" >
         </activity>
     </application>
 
