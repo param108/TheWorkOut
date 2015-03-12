@@ -1,6 +1,7 @@
 package com.workout.paramp.theworkout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.ActionBarActivity;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -25,17 +27,25 @@ public class AddExercise extends ActionBarActivity {
 
     Map<String,Integer> focus_map;
     Map<String,Integer> exercise_map;
-    private void populateExercises() {
+    Spinner spinner;
+    private void populateExercises( int focus_id) {
         exercise_map.clear();
+        LinearLayout l = (LinearLayout)findViewById(R.id.ex_lin_layout);
+
+        /*
+         * Clear everything before we start to populate
+         */
+
+        l.removeAllViewsInLayout();
         SQLiteDatabase db = DataBaseHandler.getInstance(this).myDB;
         String[] cols = {"name","exercise_id"};
-        Cursor c = db.query(true,"exercise_data",cols,null,null,null,null,null,null);
+        Cursor c = db.query(true,"exercise_data",cols,"focus_id = " + focus_id,null, null,null,null,null);
         if (c.getCount() == 0) {
             c.close();
             return;
         }
 
-        LinearLayout l = (LinearLayout)findViewById(R.id.ex_lin_layout);
+
         c.moveToFirst();
         while(!c.isAfterLast()) {
             exercise_map.put(c.getString(0),c.getInt(1));
@@ -50,7 +60,7 @@ public class AddExercise extends ActionBarActivity {
                 public void onClick(View v) {
                     String a = ((TextView)(((RelativeLayout)v.getParent()).getChildAt(0))).getText().toString();
                     DataBaseHandler.getInstance(getApplicationContext()).removeExercise(a);
-                    populateExercises();
+                    populateExercises(focus_map.get(spinner.getSelectedItem().toString()));
                 }
             });
             ex_tv.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +82,7 @@ public class AddExercise extends ActionBarActivity {
          */
         focus_map.clear();
 
+
         SQLiteDatabase db = DataBaseHandler.getInstance(this).myDB;
         String[] cols = {"focus_id", "name"};
         Cursor c = db.query(true, "focus_data", cols, null, null, null, null, null, null);
@@ -90,7 +101,7 @@ public class AddExercise extends ActionBarActivity {
         }
         c.close();
 
-        Spinner spinner = (Spinner) findViewById(R.id.focus_spinner);
+        spinner = (Spinner) findViewById(R.id.focus_spinner);
 
 // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -100,8 +111,17 @@ public class AddExercise extends ActionBarActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-
+        populateExercises(focus_map.get(spinner.getSelectedItem().toString()));
     }
+
+
+    public void onResume() {
+        super.onResume();
+        //RelativeLayout rl = (RelativeLayout)findViewById(R.id.main_relative_layout);
+        //rl.removeAllViewsInLayout();
+        populateSpinner();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         focus_map = new HashMap<String,Integer>();
@@ -110,12 +130,30 @@ public class AddExercise extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_exercise);
         populateSpinner();
-        populateExercises();
+        /*
+         * We only need to do this once.
+         */
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                populateExercises(focus_map.get(spinner.getSelectedItem().toString()));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         Button b = (Button)findViewById(R.id.add_exercise);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent in = new Intent(getApplicationContext(),ModifyExercise.class);
 
+                in.putExtra("TheWorkout.focus_id",
+                        focus_map.get(spinner.getSelectedItem().toString()));
+                in.putExtra("TheWorkout.focus_name",spinner.getSelectedItem().toString());
+                startActivity(in);
             }
         });
     }

@@ -1,17 +1,30 @@
 package com.workout.paramp.theworkout;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 public class ModifyExercise extends ActionBarActivity {
+
+    String focus_name;
+    int focus_id;
+    private void populateFocusData() {
+        Intent i = getIntent();
+        focus_name = i.getStringExtra("TheWorkout.focus_name");
+        focus_id = i.getIntExtra("TheWorkout.focus_id",1);
+        TextView tv = (TextView)findViewById(R.id.exercise_focus);
+        tv.setText("Focus: "+ focus_name);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_exercise);
+        populateFocusData();
     }
 
 
