@@ -1,17 +1,58 @@
 package com.workout.paramp.theworkout;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class ModifyExercise extends ActionBarActivity {
 
     String focus_name;
     int focus_id;
+
+    public void addExerciseBtn(View view) {
+        EditText etv = (EditText)findViewById(R.id.exercise_name);
+        EditText dtv = (EditText)findViewById(R.id.exercise_desc);
+
+        SQLiteDatabase db = DataBaseHandler.getInstance(this).myDB;
+        ContentValues values = new ContentValues();
+        values.put("name", etv.getText().toString());
+        values.put("details", dtv.getText().toString());
+        values.put("focus_id",focus_id);
+        // will try 3 times
+        int i = 0;
+        while(i < 3) {
+            values.put("exercise_id", DataBaseHandler.getInstance(this).getNextExerciseId());
+            try {
+                if (DataBaseHandler.getInstance(this).myDB.insert("exercise_data", null, values)<0) {
+                    i++;
+                    values.remove("exercise_id");
+                    continue;
+                }
+            } catch (Throwable e) {
+                i++;
+                values.remove("exercise_id");
+                continue;
+            }
+            // success
+            break;
+        }
+        if (i == 3) {
+            Toast t = Toast.makeText(getApplicationContext(), "Failed to add this exercise", 10);
+            t.show();
+            return;
+        }
+        finish();
+    }
     private void populateFocusData() {
         Intent i = getIntent();
         focus_name = i.getStringExtra("TheWorkout.focus_name");

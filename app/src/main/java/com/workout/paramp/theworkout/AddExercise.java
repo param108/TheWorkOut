@@ -71,6 +71,7 @@ public class AddExercise extends ActionBarActivity {
                      */
                 }
             });
+            l.addView(rowView);
             c.moveToNext();
         }
         c.close();
@@ -126,7 +127,6 @@ public class AddExercise extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         focus_map = new HashMap<String,Integer>();
         exercise_map = new HashMap<String,Integer>();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_exercise);
         populateSpinner();

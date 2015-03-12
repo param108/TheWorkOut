@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.sql.DatabaseMetaData;
 
@@ -55,6 +56,11 @@ public class AddFocusArea extends ActionBarActivity {
             }
             // success
             break;
+        }
+        if (i == 3) {
+            Toast t = Toast.makeText(this, "Failed to add focus area",10);
+            t.show();
+            return;
         }
         finish();
     }

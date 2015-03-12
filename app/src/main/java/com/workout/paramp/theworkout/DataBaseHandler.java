@@ -132,4 +132,20 @@ public class DataBaseHandler {
         myDB.delete("exercise_data","name" + " = ?" , new String[]{s});
     }
 
+    public int getNextExerciseId() {
+        try {
+            String[] cols={"exercise_id"};
+            Cursor c = myDB.query(true, "exercise_data", cols, null, null, null, null, "exercise_id desc", "1");
+            int val = 0;
+            if (c.getCount() == 0) {
+                return 1;
+            }
+            c.moveToFirst();
+            val = c.getInt(0);
+            c.close();
+            return val+1;
+        } catch(Throwable e) {
+            return 1;
+        }
+    }
 }
