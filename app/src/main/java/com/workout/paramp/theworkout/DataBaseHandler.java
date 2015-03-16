@@ -7,7 +7,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ContentHandler;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
@@ -18,7 +26,35 @@ public class DataBaseHandler {
     private static DataBaseHandler instance = null;
     public SQLiteDatabase myDB = null;
     private static Context localContext;
+    private void copyInputStreamToFile( InputStream in, File file ) {
+        try {
+            OutputStream out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len=in.read(buf))>0){
+                out.write(buf,0,len);
+            }
+            out.close();
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     protected DataBaseHandler(Context ctx) {
+        /*
+         * Before we do anything we check if the database already exists.
+         */
+        File dbFile = ctx.getDatabasePath("MyWorkOut");
+        if (!dbFile.exists()) {
+            try {
+                copyInputStreamToFile(ctx.getAssets().open("databases/MyWorkOut.db"),dbFile);
+            } catch (IOException io) {
+                // just go ahead, we create it below anyway!
+            }
+        }
+
         myDB = ctx.openOrCreateDatabase("MyWorkOut", Context.MODE_PRIVATE, null);
     }
 
@@ -48,6 +84,7 @@ public class DataBaseHandler {
     }
 
     public void CreateDb() {
+
         try {
             SQLiteStatement stmt = myDB.compileStatement("Create table workouts ( name char(20) PRIMARY KEY NOT NULL," +
                     "workout_id int NOT NULL," +
