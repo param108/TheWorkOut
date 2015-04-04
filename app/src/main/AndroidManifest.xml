@@ -18,11 +18,6 @@
         <activity
             android:name=".AddExercise"
             android:label="@string/title_activity_add_exercise" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".AddWorkout"
@@ -39,6 +34,15 @@
         <activity
             android:name=".ModifyExercise"
             android:label="@string/title_activity_modify_exercise" >
+        </activity>
+        <activity
+            android:name=".AdminActivity"
+            android:label="@string/title_activity_admin" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

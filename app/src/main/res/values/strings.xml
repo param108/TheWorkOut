@@ -9,4 +9,5 @@
     <string name="title_activity_show_work_out">ShowWorkOut</string>
     <string name="title_activity_show_focus_area">ShowFocusArea</string>
     <string name="title_activity_modify_exercise">ModifyExercise</string>
+    <string name="title_activity_admin">AdminActivity</string>
 </resources>
