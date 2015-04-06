@@ -41,6 +41,21 @@ public class DataBaseHandler {
         }
     }
 
+    public void restoreDb() {
+        File dbFile = localContext.getDatabasePath("MyWorkOut");
+        if (dbFile.exists()) {
+            if (myDB != null) {
+                myDB.close();
+            }
+            dbFile.delete();
+        }
+        try {
+            copyInputStreamToFile(localContext.getAssets().open("databases/MyWorkOut.db"),dbFile);
+        } catch (IOException io) {
+            // just go ahead, we create it below anyway!
+        }
+        myDB = localContext.openOrCreateDatabase("MyWorkOut", Context.MODE_PRIVATE, null);
+    }
 
     protected DataBaseHandler(Context ctx) {
         /*

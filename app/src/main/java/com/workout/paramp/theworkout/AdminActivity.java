@@ -56,4 +56,9 @@ public class AdminActivity extends ActionBarActivity {
         startActivity(in);
 
     }
+
+    public void on_admin_restore_db_click(View view) {
+        DataBaseHandler db = DataBaseHandler.getInstance(getApplicationContext());
+        db.restoreDb();
+    }
 }

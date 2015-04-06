@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.ActionMenuView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -37,35 +39,30 @@ public class ShowFocusArea extends ActionBarActivity {
         myC.moveToFirst();
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         while(!myC.isAfterLast()) {
-
-            Context ctx = getApplicationContext();
-            LinearLayout h = new LinearLayout(ctx);
-            h.setOrientation(LinearLayout.HORIZONTAL);
-
-
-            TextView focus_name = new TextView(ctx);
-            focus_name.setText(myC.getString(0));
-            focus_name.setTextAppearance(getApplicationContext(), R.dimen.abc_text_size_large_material);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            h.setLayoutParams(params);
-            focus_name.setLayoutParams(params);
-            Button b = new Button(ctx);
-            b.setText("X");
-            b.setLayoutParams(params);
-            h.addView(focus_name);
-            h.addView(b);
-            l.addView(h,lp);
+            LayoutInflater inflater = (LayoutInflater) getApplicationContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inflater.inflate(R.layout.exercise_list,l, false);
+            TextView ex_tv = (TextView) rowView.findViewById(R.id.textView);
+            ex_tv.setText(myC.getString(0));
+            Button b = (Button) rowView.findViewById(R.id.button);
 
             b.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String s = ((TextView)(((LinearLayout)v.getParent()).getChildAt(0))).getText().toString();
+                    String s = ((TextView)(((RelativeLayout)v.getParent()).getChildAt(0))).getText().toString();
                     DataBaseHandler.getInstance(getApplicationContext()).removeFocusArea(s);
                     showFocusAreas();
                 }
             });
-
+            ex_tv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    /*
+                     * add code here to go to modify screen
+                     */
+                }
+            });
+            l.addView(rowView);
             myC.moveToNext();
         }
         myC.close();

@@ -26,4 +26,11 @@
         android:id="@+id/admin_workout"
         android:layout_below="@+id/admin_exercise"
         android:onClick="on_admin_workout_click"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Restore Database"
+        android:id="@+id/admin_restore_db"
+        android:layout_below="@+id/admin_workout"
+        android:onClick="on_admin_restore_db_click"/>
 </RelativeLayout>
