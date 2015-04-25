@@ -33,7 +33,6 @@ public class ShowFocusArea extends ActionBarActivity {
 
         String[] cols={"name","details"};
         DataBaseHandler db = DataBaseHandler.getInstance(this);
-        db.CreateDb();
         Cursor myC = DataBaseHandler.getInstance(this).myDB.query(true,"focus_data",cols,
                 null,null,null,null,null,null);
         myC.moveToFirst();

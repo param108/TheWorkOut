@@ -54,7 +54,6 @@ public class AdminActivity extends ActionBarActivity {
     public void on_admin_workout_click(View view) {
         Intent in = new Intent(getApplicationContext(),AddWorkout.class);
         startActivity(in);
-
     }
 
     public void on_admin_restore_db_click(View view) {

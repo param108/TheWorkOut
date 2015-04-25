@@ -63,6 +63,8 @@ public class DataBaseHandler {
          */
         File dbFile = ctx.getDatabasePath("MyWorkOut");
         if (!dbFile.exists()) {
+            myDB = ctx.openOrCreateDatabase("MyWorkOut", Context.MODE_PRIVATE, null);
+            myDB.close();
             try {
                 copyInputStreamToFile(ctx.getAssets().open("databases/MyWorkOut.db"),dbFile);
             } catch (IOException io) {
@@ -81,13 +83,82 @@ public class DataBaseHandler {
         return instance;
     }
 
-    public void createExerciseTable() {
+    public void createWorkoutTables(boolean clear) {
         SQLiteStatement stmt;
-        try {
-            stmt = myDB.compileStatement("drop table exercise_data");
-            stmt.execute();
-        } catch (Exception e) {
+        if (clear) {
+            try {
+                stmt = myDB.compileStatement("drop table workout_data" );
+                stmt.execute();
+            } catch (Exception e) {
             /* ignore a drop error */
+            }
+
+            try {
+                stmt = myDB.compileStatement("drop table workout_features" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
+
+            try {
+                stmt = myDB.compileStatement("drop table workout_schema" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
+
+            try {
+                stmt = myDB.compileStatement("drop table workout_names" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
+        }
+        stmt = myDB.compileStatement("Create table workout_names ( workout_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "name char(30) NOT NULL UNIQUE," + // name of workout
+                "details char(150) NOT NULL)"   // description of workout, usually a url
+        );
+        stmt.execute();
+
+        stmt = myDB.compileStatement("Create table workout_schema ( workout_id int NOT NULL," +
+                "set_id int NOT NULL," + // name of exercise
+                "focus_id int NOT NULL," +
+                "num_reps_min int NOT NULL," +
+                "intensity int NOT NULL," +
+                "rest_time int NOT NULL," +
+                "FOREIGN KEY (focus_id) references focus_data(focus_id)," +
+                "FOREIGN KEY (workout_id) references workout_names(workout_id)," +
+                "PRIMARY KEY(workout_id,set_id))");
+        stmt.execute();
+
+        stmt = myDB.compileStatement("Create table workout_data ( created_at DATETIME DEFAULT CURRENT_DATE," +
+                "workout_id int NOT NULL,"+
+                "exercise_id int NOT NULL," + // which exercise
+                "set_id int NOT NULL,"   + // order of focus
+                "weight int NOT NULL,"      + // representative number for weight
+                "num_reps int NOT NULL,"        + // number of reps
+                "intensity int NOT NULL,"   + // intensity achieved
+                "rest_time int NOT NULL," +          // remarks about the workout
+                "FOREIGN KEY(workout_id) references workout_names(workout_id)," +
+                "FOREIGN KEY(exercise_id) references exercise_data(exercise_id)," +
+                "FOREIGN KEY(set_id) references workout_schema(set_id)," +
+                "PRIMARY KEY(created_at, workout_id, set_id))"
+        );
+
+        stmt.execute();
+
+
+    }
+
+    public void createExerciseTable(boolean clear) {
+        SQLiteStatement stmt;
+        if (clear) {
+            try {
+                stmt = myDB.compileStatement("drop table exercise_data" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
         }
         stmt = myDB.compileStatement("Create table exercise_data ( exercise_id int PRIMARY KEY NOT NULL," +
                 "focus_id int NOT NULL,"  + // focus for this exercise
@@ -101,36 +172,14 @@ public class DataBaseHandler {
     public void CreateDb() {
 
         try {
-            SQLiteStatement stmt = myDB.compileStatement("Create table workouts ( name char(20) PRIMARY KEY NOT NULL," +
-                    "workout_id int NOT NULL," +
-                    "num_focus int NOT NULL," + // Number of focus areas
-                    "total_time int NOT NULL)"  // Time the workout takes in minutes
-            );
-            stmt.execute();
-            stmt = myDB.compileStatement("Create table workout_schema ( workout_id int NOT NULL,"+
-                    "seq_no int NOT NULL,"          + // order of focus
-                    "focus_id int NOT NULL,"        + // focus_id
-                    "sets int NOT NULL)"             // number of sets
-            );
-            stmt.execute();
-            stmt = myDB.compileStatement("Create table workout_data ( created_at DATETIME DEFAULT CURRENT_DATE," +
-                    "workout_id int NOT NULL,"+
-                    "focus_id int NOT NULL," + // focus area
-                    "seq_no int NOT NULL,"   + // order of focus
-                    "exercise_id int NOT NULL," + // which exercise
-                    "weight int NOT NULL,"      + // representative number for weight
-                    "reps int NOT NULL,"        + // number of reps
-                    "intensity int NOT NULL,"   + // intensity achieved
-                    "remarks char(250) NOT NULL)"       // remarks about the workout
-            );
-            stmt.execute();
-            stmt = myDB.compileStatement("Create table focus_data ( focus_id int PRIMARY KEY NOT NULL," +
+           createWorkoutTables(false);
+           SQLiteStatement stmt = myDB.compileStatement("Create table focus_data ( focus_id int PRIMARY KEY NOT NULL," +
                     "name char(30) NOT NULL UNIQUE," + // name of focus area
                     "details char(150) NOT NULL)"   // details of the focus area/muscle group, usually a url
             );
             stmt.execute();
 
-            createExerciseTable();
+            createExerciseTable(false);
 
         } catch (Exception s) {
             // Work out db already exists with necessary tables
@@ -144,7 +193,7 @@ public class DataBaseHandler {
 
     public void deleteDB() {
         try {
-            SQLiteStatement stmt = myDB.compileStatement("Drop table workouts");
+            SQLiteStatement stmt = myDB.compileStatement("Drop table workout_names");
             stmt.execute();
             stmt = myDB.compileStatement("Drop table workout_schema");
             stmt.execute();
@@ -182,6 +231,10 @@ public class DataBaseHandler {
 
     public void removeExercise(String s) {
         myDB.delete("exercise_data","name" + " = ?" , new String[]{s});
+    }
+
+    public void remove_workout(int id) {
+        myDB.delete("workout_names","workout_id = ?", new String[]{Integer.toString(id)});
     }
 
     public int getNextExerciseId() {
