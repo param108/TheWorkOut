@@ -1,5 +1,6 @@
 package com.workout.paramp.theworkout;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,60 +22,49 @@ import java.util.Map;
 
 
 public class AddWorkout extends ActionBarActivity {
-    Map workout_id_map;
-    protected void show_workouts() {
-        LinearLayout l = (LinearLayout)findViewById(R.id.workouts_linear_layout);
-        l.removeAllViewsInLayout();
-        workout_id_map.clear();
-
-        String[] cols={"workout_id", "name","details"};
-        DataBaseHandler db = DataBaseHandler.getInstance(this);
-        Cursor myC = DataBaseHandler.getInstance(this).myDB.query(true,"workout_names",cols,
-                null,null,null,null,null,null);
-        myC.moveToFirst();
-        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        while(!myC.isAfterLast()) {
-            workout_id_map.put(myC.getString(1),myC.getInt(0));
-            LayoutInflater inflater = (LayoutInflater) getApplicationContext()
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rowView = inflater.inflate(R.layout.exercise_list,l, false);
-            TextView ex_tv = (TextView) rowView.findViewById(R.id.textView);
-            ex_tv.setText(myC.getString(1));
-            Button b = (Button) rowView.findViewById(R.id.button);
-
-            b.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String s = ((TextView)(((RelativeLayout)v.getParent()).getChildAt(0))).getText().toString();
-                    DataBaseHandler.getInstance(getApplicationContext()).remove_workout((int)workout_id_map.get(s));
-                    show_workouts();
-                }
-            });
-            ex_tv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    /*
-                     * add code here to go to modify screen
-                     */
-                }
-            });
-            l.addView(rowView);
-            myC.moveToNext();
-        }
-        myC.close();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_workout);
-        workout_id_map = new HashMap();
-        show_workouts();
     }
 
-    public void on_add_workout(View v) {
+    public void onResume() {
+        super.onResume();
+        EditText f_desc = (EditText) this.findViewById(R.id.workout_desc);
+        EditText f_name = (EditText) this.findViewById(R.id.workout_name);
 
+        f_desc.setText("");
+        f_name.setText("");
+    }
 
+    public void addWorkout(View view) {
+        EditText f_desc = (EditText) this.findViewById(R.id.workout_desc);
+        EditText f_name = (EditText) this.findViewById(R.id.workout_name);
+        ContentValues values = new ContentValues();
+        values.put("name",f_name.getText().toString());
+        values.put("details",f_desc.getText().toString());
+        // will try 3 times
+        int i = 0;
+        while(i < 3) {
+            try {
+                if (DataBaseHandler.getInstance(this).myDB.insert("workout_names", null, values)<0) {
+                    i++;
+                    continue;
+                }
+            } catch (Throwable e) {
+                i++;
+                continue;
+            }
+            // success
+            break;
+        }
+        if (i == 3) {
+            Toast t = Toast.makeText(this, "Failed to add workout",10);
+            t.show();
+            return;
+        }
+        finish();
     }
 
     @Override

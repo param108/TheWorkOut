@@ -52,7 +52,7 @@ public class AdminActivity extends ActionBarActivity {
     }
 
     public void on_admin_workout_click(View view) {
-        Intent in = new Intent(getApplicationContext(),AddWorkout.class);
+        Intent in = new Intent(getApplicationContext(),ShowWorkOut.class);
         startActivity(in);
     }
 
