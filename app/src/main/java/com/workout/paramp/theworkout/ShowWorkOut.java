@@ -54,7 +54,10 @@ public class ShowWorkOut extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     String s = ((TextView)(((RelativeLayout)v.getParent()).getChildAt(0))).getText().toString();
-                    /* Start the modifyWorkout activity */
+                    /* Start the ConfigureWorkout activity */
+                    Intent in = new Intent(getApplicationContext(),ConfigureWorkout.class);
+                    in.putExtra("workout_id",(int)workout_id_map.get(s));
+                    startActivity(in);
                 }
             });
 

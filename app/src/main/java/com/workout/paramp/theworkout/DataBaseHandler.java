@@ -83,6 +83,31 @@ public class DataBaseHandler {
         return instance;
     }
 
+    public void createWorkoutSchemaTable(boolean clear) {
+        SQLiteStatement stmt;
+        if (clear) {
+            try {
+                stmt = myDB.compileStatement("drop table workout_schema" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
+        }
+
+        stmt = myDB.compileStatement("Create table workout_schema ( workout_id int NOT NULL," +
+                "set_id int NOT NULL," + // name of exercise
+                "focus_id int NOT NULL," +
+                "num_reps_min int NOT NULL," +
+                "intensity int NOT NULL," +
+                "weight int NOT NULL," +
+                "rest_time int NOT NULL," +
+                "duration int NOT NULL," +
+                "FOREIGN KEY (focus_id) references focus_data(focus_id)," +
+                "FOREIGN KEY (workout_id) references workout_names(workout_id)," +
+                "PRIMARY KEY(workout_id,set_id))");
+        stmt.execute();
+    }
+
     public void createWorkoutTables(boolean clear) {
         SQLiteStatement stmt;
         if (clear) {
@@ -101,13 +126,6 @@ public class DataBaseHandler {
             }
 
             try {
-                stmt = myDB.compileStatement("drop table workout_schema" );
-                stmt.execute();
-            } catch (Exception e) {
-            /* ignore a drop error */
-            }
-
-            try {
                 stmt = myDB.compileStatement("drop table workout_names" );
                 stmt.execute();
             } catch (Exception e) {
@@ -120,16 +138,7 @@ public class DataBaseHandler {
         );
         stmt.execute();
 
-        stmt = myDB.compileStatement("Create table workout_schema ( workout_id int NOT NULL," +
-                "set_id int NOT NULL," + // name of exercise
-                "focus_id int NOT NULL," +
-                "num_reps_min int NOT NULL," +
-                "intensity int NOT NULL," +
-                "rest_time int NOT NULL," +
-                "FOREIGN KEY (focus_id) references focus_data(focus_id)," +
-                "FOREIGN KEY (workout_id) references workout_names(workout_id)," +
-                "PRIMARY KEY(workout_id,set_id))");
-        stmt.execute();
+        createWorkoutSchemaTable(clear);
 
         stmt = myDB.compileStatement("Create table workout_data ( created_at DATETIME DEFAULT CURRENT_DATE," +
                 "workout_id int NOT NULL,"+
@@ -184,7 +193,7 @@ public class DataBaseHandler {
         } catch (Exception s) {
             // Work out db already exists with necessary tables
             // return the db
-            Toast t = Toast.makeText(localContext, "Using existing database",10);
+            Toast t = Toast.makeText(localContext, "Using existing database",Toast.LENGTH_SHORT);
             t.show();
 
         }
@@ -252,5 +261,16 @@ public class DataBaseHandler {
         } catch(Throwable e) {
             return 1;
         }
+    }
+
+    public String getWorkoutName(int workout_id) {
+        String[] cols={"name"};
+        Cursor c = myDB.query(true, "workout_names", cols, "workout_id = ?",
+                    new String[] {Integer.toString(workout_id)}, null, null,null,"1");
+        if (c.getCount() == 0) {
+            return null;
+        }
+        c.moveToFirst();
+        return c.getString(0);
     }
 }
