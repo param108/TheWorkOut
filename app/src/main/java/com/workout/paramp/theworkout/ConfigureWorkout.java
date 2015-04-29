@@ -1,8 +1,10 @@
 package com.workout.paramp.theworkout;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.graphics.Rect;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -165,7 +167,7 @@ public class ConfigureWorkout extends ActionBarActivity {
             intensity_edit.setText(Integer.toString(w.intensity.value));
             rest_edit.setText(Integer.toString(w.rest_time.value));
             duration_edit.setText(Integer.toString(w.duration.value));
-            weight_edit.setText(Integer.toString(w.weight.value));
+            weight_edit.setText(Float.toString(w.weight.value));
 
             configure_info_layout_edit_text(reps_edit, w.num_reps_min, w.modified );
             configure_info_layout_edit_text(intensity_edit, w.intensity, w.modified);
@@ -239,6 +241,11 @@ public class ConfigureWorkout extends ActionBarActivity {
         t_edit.addTextChangedListener(ctw);
     }
 
+    private void configure_info_layout_edit_text(EditText t_edit, WMutableFloat val, WMutableBoolean modified) {
+        ConfigureWorkoutTextWatcher ctw = new ConfigureWorkoutTextWatcher(val, modified);
+        t_edit.addTextChangedListener(ctw);
+    }
+
     private void populate_data() {
         workout_data.clear();
         seen_setids.clear();
@@ -261,7 +268,7 @@ public class ConfigureWorkout extends ActionBarActivity {
                     myC.getInt(1),
                     myC.getInt(2),
                     myC.getInt(3),
-                    myC.getInt(4),
+                    myC.getFloat(4),
                     myC.getInt(5),
                     myC.getInt(6));
             workout_data.add(wdata);
@@ -289,6 +296,28 @@ public class ConfigureWorkout extends ActionBarActivity {
         data_layout = (LinearLayout)findViewById(R.id.configure_workout_data);
         populate_data();
         populate_view();
+    }
+
+    public void configure_workout_save_data_clicked(View v) {
+        DataBaseHandler db = DataBaseHandler.getInstance(getApplicationContext());
+        for (WorkOutData w : workout_data) {
+            ContentValues cv= new ContentValues();
+            cv.put("workout_id",workout_id);
+            cv.put("focus_id",w.focus_id.value);
+            cv.put("set_id",w.set_id.value);
+            cv.put("num_reps_min",w.num_reps_min.value);
+            cv.put("intensity",w.intensity.value);
+            cv.put("weight",w.weight.value);
+            cv.put("rest_time",w.rest_time.value);
+            cv.put("duration",w.duration.value);
+            db.myDB.insert("workout_schema",null,cv);
+            if (seen_setids.contains(w.set_id.value)) {
+                db.myDB.update("workout_schema", cv,"set_id = ? and workout_id = ?",
+                        new String[]{Integer.toString(w.set_id.value),Integer.toString(workout_id)});
+            } else {
+                db.myDB.insert("workout_schema",null,cv);
+            }
+        }
     }
 
     public void configure_workout_add_set_clicked(View v) {

@@ -1,6 +1,7 @@
 package com.workout.paramp.theworkout;
 
 import android.util.MutableBoolean;
+import android.util.MutableFloat;
 import android.util.MutableInt;
 
 class WMutableInt {
@@ -8,6 +9,11 @@ class WMutableInt {
     public WMutableInt(int val) {
         value = val;
     }
+}
+
+class WMutableFloat {
+    public float value;
+    public WMutableFloat(float val) {value = val;}
 }
 
 class WMutableBoolean {
@@ -24,7 +30,7 @@ public class WorkOutData {
     public WMutableInt focus_id;
     public WMutableInt num_reps_min;
     public WMutableInt intensity;
-    public WMutableInt weight;
+    public WMutableFloat weight;
     public WMutableInt rest_time;
     public WMutableInt duration;
     public WMutableBoolean modified;
@@ -40,12 +46,12 @@ public class WorkOutData {
     }
 
     public WorkOutData(int set_id, int focus_id, int num_reps_min,
-                       int intensity, int weight, int rest_time, int duration) {
+                       int intensity, float weight, int rest_time, int duration) {
         this.set_id = new WMutableInt(set_id);
         this.focus_id = new WMutableInt(focus_id);
         this.num_reps_min = new WMutableInt(num_reps_min);
         this.intensity = new WMutableInt(intensity);
-        this.weight = new WMutableInt(weight);
+        this.weight = new WMutableFloat(weight);
         this.rest_time = new WMutableInt(rest_time);
         this.duration = new WMutableInt(duration);
         this.modified = new WMutableBoolean(false);

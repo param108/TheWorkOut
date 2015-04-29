@@ -99,7 +99,7 @@ public class DataBaseHandler {
                 "focus_id int NOT NULL," +
                 "num_reps_min int NOT NULL," +
                 "intensity int NOT NULL," +
-                "weight int NOT NULL," +
+                "weight float NOT NULL," +
                 "rest_time int NOT NULL," +
                 "duration int NOT NULL," +
                 "FOREIGN KEY (focus_id) references focus_data(focus_id)," +

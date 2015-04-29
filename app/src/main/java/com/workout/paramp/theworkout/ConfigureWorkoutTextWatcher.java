@@ -20,26 +20,47 @@ public class ConfigureWorkoutTextWatcher implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable s) {
-        WMutableInt oldval = new WMutableInt(val.value);
+        WMutableInt oldval = null;
+        WMutableFloat float_oldval = null;
+
+        if (isFloat) {
+            float_oldval = new WMutableFloat(valfloat.value);
+        } else {
+            oldval = new WMutableInt(val.value);
+        }
+
         try {
-            val.value = Integer.parseInt(s.toString());
+            if (isFloat) {
+                valfloat.value = Float.parseFloat(s.toString());
+            } else {
+                val.value = Integer.parseInt(s.toString());
+            }
         } catch(Exception e){
             // do nothing
-            val.value = oldval.value;
+            if (isFloat) {
+                valfloat.value = float_oldval.value;
+            } else {
+                val.value = oldval.value;
+            }
             return;
         }
         modified.value = true;
-        Log.i("workout", "updating value : "+ val.value);
 
     }
 
     private WMutableInt val;
+    private WMutableFloat valfloat;
     private WMutableBoolean modified;
+    boolean isFloat;
     public ConfigureWorkoutTextWatcher(WMutableInt val, WMutableBoolean modified) {
+        isFloat = false;
         this.val = val;
-        if (this.val == val) {
-            Log.i("workout", "They are same");
-        }
+        this.modified = modified;
+    }
+
+    public ConfigureWorkoutTextWatcher(WMutableFloat val, WMutableBoolean modified) {
+        isFloat = true;
+        this.valfloat = val;
         this.modified = modified;
     }
 }
