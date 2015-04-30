@@ -38,6 +38,14 @@
         <activity
             android:name=".AdminActivity"
             android:label="@string/title_activity_admin" >
+        </activity>
+        <activity
+            android:name=".ConfigureWorkout"
+            android:label="@string/title_activity_configure_workout" >
+        </activity>
+        <activity
+            android:name=".PlayWorkOut"
+            android:label="@string/title_activity_play_work_out" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,8 +53,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ConfigureWorkout"
-            android:label="@string/title_activity_configure_workout" >
+            android:name=".PlanWorkout"
+            android:label="@string/title_activity_plan_workout" >
+        </activity>
+        <activity
+            android:name=".StartWorkout"
+            android:label="@string/title_activity_start_workout" >
+        </activity>
+        <activity
+            android:name=".ChooseWorkout"
+            android:label="@string/title_activity_choose_workout" >
         </activity>
     </application>
 

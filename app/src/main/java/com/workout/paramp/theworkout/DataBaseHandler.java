@@ -13,9 +13,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.ContentHandler;
 import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
@@ -108,6 +111,65 @@ public class DataBaseHandler {
         stmt.execute();
     }
 
+    public void createWorkoutDataTable(boolean clear) {
+        SQLiteStatement stmt;
+        if (clear) {
+            try {
+                stmt = myDB.compileStatement("drop table workout_data" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
+        }
+
+        stmt = myDB.compileStatement("Create table workout_data (date DATETIME DEFAULT CURRENT_DATE," +
+                        "start_time DATETIME," +
+                        "end_time DATETIME," +
+                        "workout_id int NOT NULL,"+
+                        "exercise_id int NOT NULL," + // which exercise
+                        "set_id int NOT NULL,"   + // order of focus
+                        "intensity int NOT NULL,"   + // intensity achieved
+                        "weight int NOT NULL,"      + // representative number for weight
+                        "num_reps int NOT NULL,"        + // number of reps
+                        "rest_time int NOT NULL," +          // remarks about the workout
+                        "FOREIGN KEY(workout_id) references workout_names(workout_id)," +
+                        "FOREIGN KEY(exercise_id) references exercise_data(exercise_id)," +
+                        "FOREIGN KEY(set_id) references workout_schema(set_id)," +
+                        "PRIMARY KEY(date, workout_id, set_id))"
+        );
+
+        stmt.execute();
+    }
+
+    public void createWorkoutPlanTable(boolean clear) {
+        SQLiteStatement stmt;
+        if (clear) {
+            try {
+                stmt = myDB.compileStatement("drop table workout_plan" );
+                stmt.execute();
+            } catch (Exception e) {
+            /* ignore a drop error */
+            }
+        }
+
+        stmt = myDB.compileStatement("Create table workout_plan (date DATETIME DEFAULT CURRENT_DATE," +
+                        "workout_id int NOT NULL,"+
+                        "exercise_id int NOT NULL," + // which exercise
+                        "set_id int NOT NULL,"   + // order of focus
+                        "intensity int NOT NULL,"   + // intensity achieved
+                        "weight int NOT NULL,"      + // representative number for weight
+                        "num_reps int NOT NULL,"        + // number of reps
+                        "rest_time int NOT NULL," +          // remarks about the workout
+                        "FOREIGN KEY(workout_id) references workout_names(workout_id)," +
+                        "FOREIGN KEY(exercise_id) references exercise_data(exercise_id)," +
+                        "FOREIGN KEY(set_id) references workout_schema(set_id)," +
+                        "PRIMARY KEY(date, workout_id, set_id))"
+        );
+
+        stmt.execute();
+    }
+
+
     public void createWorkoutTables(boolean clear) {
         SQLiteStatement stmt;
         if (clear) {
@@ -140,23 +202,9 @@ public class DataBaseHandler {
 
         createWorkoutSchemaTable(clear);
 
-        stmt = myDB.compileStatement("Create table workout_data ( created_at DATETIME DEFAULT CURRENT_DATE," +
-                "workout_id int NOT NULL,"+
-                "exercise_id int NOT NULL," + // which exercise
-                "set_id int NOT NULL,"   + // order of focus
-                "weight int NOT NULL,"      + // representative number for weight
-                "num_reps int NOT NULL,"        + // number of reps
-                "intensity int NOT NULL,"   + // intensity achieved
-                "rest_time int NOT NULL," +          // remarks about the workout
-                "FOREIGN KEY(workout_id) references workout_names(workout_id)," +
-                "FOREIGN KEY(exercise_id) references exercise_data(exercise_id)," +
-                "FOREIGN KEY(set_id) references workout_schema(set_id)," +
-                "PRIMARY KEY(created_at, workout_id, set_id))"
-        );
+        createWorkoutDataTable(clear);
 
-        stmt.execute();
-
-
+        createWorkoutPlanTable(clear);
     }
 
     public void createExerciseTable(boolean clear) {
@@ -272,5 +320,30 @@ public class DataBaseHandler {
         }
         c.moveToFirst();
         return c.getString(0);
+    }
+
+    public ArrayList<String> getWorkoutNames(Map<String,Integer> map) {
+        String[] cols={"name","workout_id"};
+        ArrayList<String> s = new ArrayList<>();
+        Cursor c = myDB.query(true, "workout_names", cols, null,null, null, null,null,null);
+        if (c.getCount() == 0) {
+            return null;
+        }
+        c.moveToFirst();
+        while(!c.isAfterLast()) {
+            s.add(c.getString(0));
+            if (map != null) {
+                map.put(c.getString(0), c.getInt(1));
+            }
+            c.moveToNext();
+        }
+        return s;
+    }
+
+    public boolean if_workout_planned() {
+        string[] cols={}
+        Cursor c = myDB.query(true, "workout_data", cols, null,null, null, null,null,null);
+
+        return true;
     }
 }
