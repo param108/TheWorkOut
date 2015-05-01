@@ -9,8 +9,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +24,41 @@ import java.util.Map;
 public class ChooseWorkout extends ActionBarActivity {
     ArrayList<String> workout_names;
     Map<String, Integer> workout_map;
+    ArrayAdapter<String> adapter;
+    ArrayList<String> days;
+
+    static final int TODAY = 0;
+    static final int TOMORROW = 1;
+    int which_day = TODAY;
     boolean is_plan = false;
+
+    private void populate_spinner(Spinner sp) {
+        days = new ArrayList<>();
+        days.add("Today");
+        days.add("Tomorrow");
+        sp.setVisibility(View.VISIBLE);
+        adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, days);
+// Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sp.setAdapter(adapter);
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    which_day = TODAY;
+                } else {
+                    which_day = TOMORROW;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +69,12 @@ public class ChooseWorkout extends ActionBarActivity {
         workout_map = new HashMap<>();
         workout_names = db.getWorkoutNames(workout_map);
         populate_buttons();
+        Spinner s = (Spinner)findViewById(R.id.choose_workout_date_spinner);
+        if (is_plan) {
+            populate_spinner(s);
+        } else {
+            s.setVisibility(View.GONE);
+        }
     }
 
     private void populate_buttons() {
@@ -48,11 +92,14 @@ public class ChooseWorkout extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     Intent in;
-                    if (!is_plan) {
-                        in = new Intent(getApplicationContext(), StartWorkout.class);
-                    } else {
+                    Button me = (Button)v;
+                    if (is_plan) {
                         in = new Intent(getApplicationContext(), PlanWorkout.class);
+                        in.putExtra("date",which_day); // will tell the date to populate.
+                    } else {
+                        in = new Intent(getApplicationContext(), StartWorkout.class);
                     }
+                    in.putExtra("workout_id",workout_map.get(me.getText().toString()));
                     in.putExtra("is_plan",is_plan);
                     startActivity(in);
                 }

@@ -153,12 +153,15 @@ public class DataBaseHandler {
         }
 
         stmt = myDB.compileStatement("Create table workout_plan (date DATETIME DEFAULT CURRENT_DATE," +
+                        "start_time DATETIME," + // idea is that we plan the start time of the workout
+                                                 // then calculate the start_times of each set from
+                                                 // duration and rest_time
                         "workout_id int NOT NULL,"+
                         "exercise_id int NOT NULL," + // which exercise
                         "set_id int NOT NULL,"   + // order of focus
                         "intensity int NOT NULL,"   + // intensity achieved
                         "weight int NOT NULL,"      + // representative number for weight
-                        "num_reps int NOT NULL,"        + // number of reps
+                        "num_reps_min int NOT NULL,"        + // number of reps
                         "rest_time int NOT NULL," +          // remarks about the workout
                         "FOREIGN KEY(workout_id) references workout_names(workout_id)," +
                         "FOREIGN KEY(exercise_id) references exercise_data(exercise_id)," +
@@ -340,10 +343,17 @@ public class DataBaseHandler {
         return s;
     }
 
+    /*
+     * There is an assumption here that we only allow one workout per day
+     * Its valid when we wrote the code but dont know how valid it will be in future.
+     */
     public boolean if_workout_planned() {
-        string[] cols={}
-        Cursor c = myDB.query(true, "workout_data", cols, null,null, null, null,null,null);
-
-        return true;
+        String[] cols={"workout_id"};
+        Cursor c = myDB.query(true, "workout_plan", cols,"date = CURRENT_DATE",
+                              null, null, null,null,null);
+        if (c.getCount() > 0) {
+            return true;
+        }
+        return false;
     }
 }
